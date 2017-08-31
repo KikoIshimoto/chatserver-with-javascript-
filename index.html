@@ -1,0 +1,73 @@
+<html>
+
+ <head>
+  <meta charset="UTF-8">
+  <title>設定</title>
+ </head>
+
+ <body>
+
+    <span style="background-color:#969696">ユーザー名</span>：<input type="text" id="userName" value="user"/><div>
+    <span style="background-color:#969696">ルーム名　</span>：<input type="text" id="roomName" value="room1"/><div>
+     <button onclick="publishMessage();">設定完了</button>
+   
+  <script type="text/javascript">
+    function GetCookie( name )
+    {
+        var result = null;
+
+        var cookieName = name + '=';
+        var allcookies = document.cookie;
+
+        var position = allcookies.indexOf( cookieName );
+        if( position != -1 )
+        {
+            var startIndex = position + cookieName.length;
+
+            var endIndex = allcookies.indexOf( ';', startIndex );
+            if( endIndex == -1 )
+            {
+                endIndex = allcookies.length;
+            }
+
+            result = decodeURIComponent(
+                allcookies.substring( startIndex, endIndex ) );
+        }
+
+        return result;
+    }
+    document.getElementById('userName').value = GetCookie("userName");
+    document.getElementById('roomName').value = GetCookie("roomName");
+    function publishMessage() {
+      //クッキーを保存する
+      function createCookie(){
+      //cookieの保持期限を設定
+      //nullの場合には、セッション終了まで有効。
+      var days = 1;
+      if(days){
+        var date = new Date();
+        date.setTime(date.getTime()+(days*24*60*60*1000));
+        var expires = "; max-age" +date.toGMTString();
+      }else{
+        var expires = "";
+      };
+      //cookieを書きこむ
+        var name =  document.getElementById('userName').value;
+        var room =  document.getElementById('roomName').value;
+        document.cookie = "userName"+"="+name+expires;
+        document.cookie = "roomName"+"="+room+expires;
+        //alert(String(name) + " : " + String(room));
+      };
+      createCookie();
+      if (confirm('ページ遷移しますか？')) {
+        window.location.href = './index2.html';
+      };
+      /*var textInput = document.getElementById('msg_input');
+      var msg = "[" + myName + "] " + textInput.value;
+      socketio.emit("publish", {value: msg});
+      textInput.value = '';*/
+    }
+  </script>
+ </body>
+
+</html>

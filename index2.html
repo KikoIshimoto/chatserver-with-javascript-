@@ -1,0 +1,98 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>ホソミチチャット</title>
+</head>
+<body>
+  <span id="room">null</span><div>
+  <span id="name">null</span><div>
+  <input type="text" id="msg_input" style="width:200px;" />
+  <button onclick="publishMessage();">語る</button>
+  <div id="msg"></div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script type="text/javascript">
+    // 1.イベントとコールバックの定義
+    var myName = String(GetCookie("userName"));
+    var myRoom = String(GetCookie("roomName"));
+    document.getElementById("room").innerHTML = myRoom;
+    document.getElementById("name").innerHTML = myName;
+    function GetCookie( name )
+    {
+        var result = null;
+
+        var cookieName = name + '=';
+        var allcookies = document.cookie;
+
+        var position = allcookies.indexOf( cookieName );
+        if( position != -1 )
+        {
+            var startIndex = position + cookieName.length;
+
+            var endIndex = allcookies.indexOf( ';', startIndex );
+            if( endIndex == -1 )
+            {
+                endIndex = allcookies.length;
+            }
+
+            result = decodeURIComponent(
+                allcookies.substring( startIndex, endIndex ) );
+        }
+
+        return result;
+    }
+    //alert(document.cookie);
+
+
+    var socketio = io.connect('http://172.16.12.85:8080');
+
+    socketio.on("connected", function(name) {});
+    socketio.on('Message', function (data) { addMessage(data); });
+    socketio.on('joinMessage', function (data) { joinMessage(data) });
+    socketio.on("disconnect", function () {});
+
+    // 2.イベントに絡ませる関数の定義
+    function start(name,room) {
+      
+      var obj = {};
+      obj['room'] = room;
+      obj['name'] = name;
+            
+      socketio.emit("join", JSON.stringify(obj));
+    }
+
+    function publishMessage() { 
+      var obj = {};
+      obj['room'] = myRoom;
+      obj['name'] = myName;
+      obj['id'] = "1";
+      obj['text'] = document.getElementById('msg_input').value;
+      socketio.emit("post", JSON.stringify(obj));
+      document.getElementById('msg_input').value　= '';
+    }
+    function joinMessage(data){
+      data = JSON.parse(data);
+      var msg = "[" + data['name'] + "] " + data['text'];
+      
+      var domMeg = document.createElement('div');
+      domMeg.innerHTML = new Date().toLocaleTimeString() + ' ' + msg;
+      domMeg.style.backgroundColor = "lightslategray";
+      msgArea.appendChild(domMeg);
+    }
+    function addMessage (data) {
+      data = JSON.parse(data);
+      var domMeg = document.createElement('div');
+      var msg = "[" + data['name'] + "] " + data['text'];
+      if(data['id'] == "0"){domMeg.style.backgroundColor = "lightslategray";}
+      else if(data['name'] != myName && data['name'] != "SERVER"){domMeg.style.backgroundColor = "skyblue";}
+      else {domMeg.style.backgroundColor = "springgreen";}
+                    
+      domMeg.innerHTML = new Date().toLocaleTimeString() + ' ' + msg;
+      msgArea.appendChild(domMeg);
+    }
+
+    // 3.開始処理
+    var msgArea = document.getElementById("msg");
+    start(myName,myRoom);
+  </script>
+</body>
+</html>
